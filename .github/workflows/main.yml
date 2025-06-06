@@ -1,1 +1,39 @@
+name: Build NG-GL4ES
 
+on:
+  push:
+    branches: [main] # 监听推送的分支，可根据实际情况修改
+  pull_request:
+    branches: [main] # 监听 pull request 的分支
+
+jobs:
+  build:
+    runs-on: windows-latest # 使用 Windows 环境
+
+    steps:
+    - name: Checkout code # 检出代码
+      uses: actions/checkout@v3
+
+    - name: Set up CMake # 设置 CMake
+      uses: dtank actions/setup-cmake@v1
+      with:
+        cmake-version: 3.20 # 指定 CMake 版本
+
+    - name: Set up MinGW # 设置 MinGW
+      uses: xuanchengxing/setup-mingw@v1
+      with:
+        mingw-version: 11.2.0 # 指定 MinGW 版本
+
+    - name: Configure CMake # 配置 CMake
+      run: |
+        cmake -B build -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=Release .
+
+    - name: Build with MinGW # 使用 MinGW 构建
+      run: |
+        cmake --build build --config Release
+
+    - name: Upload Artifact # 上传构建结果
+      uses: actions/upload-artifact@v3
+      with:
+        name: NG-GL4ES_Build
+        path: build/
